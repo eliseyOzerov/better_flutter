@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:better_flutter/frame/frame.dart';
 import 'package:flutter/material.dart';
 
@@ -5,8 +7,31 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  FragmentShader? _shader;
+
+  Future<void> _loadShader() async {
+    final asset = await FragmentProgram.fromAsset('shaders/noise_shader.frag');
+    final shader = asset.fragmentShader();
+    shader.setFloat(0, 100);
+    shader.setFloat(1, 100);
+    setState(() {
+      _shader = shader;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadShader();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,47 +39,44 @@ class MyApp extends StatelessWidget {
       home: Builder(builder: (context) {
         return Scaffold(
           body: Center(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
-                border: Border.all(color: Colors.white.withOpacity(0.8)),
-                image: const DecorationImage(
-                  image: NetworkImage('https://picsum.photos/250?image=9'),
-                  opacity: 0.7,
-                ),
-              ),
-              child: Frame(
-                style: Style(
-                  backgroundColor: Colors.orange.withOpacity(0.8),
-                  // backgroundGradient: ,
-                  backdropBlur: 4,
-                  borderRadius: BorderRadius.circular(50),
-                  dropShadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.25),
-                      offset: const Offset(0, 3),
-                      blurRadius: 20,
+            child: Stack(
+              children: [
+                // Frame(
+                //   style: Style(
+                //     backgroundColor: Colors.red,
+                //     borderRadius: BorderRadius.circular(0),
+                //   ),
+                //   box: BoxModel(
+                //     margin: const EdgeInsets.all(12),
+                //     height: 200,
+                //     width: 200,
+                //   ),
+                // ),
+                Frame(
+                  style: Style(
+                    backgroundColor: Colors.green,
+                    border: StyleBorder(
+                      cornerSmoothing: 0.6,
+                      radius: BorderRadius.circular(24),
+                      color: Colors.blue,
+                      width: 4,
+                      dashPattern: const [20, 10],
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                      shader: _shader,
+                      gradient: const LinearGradient(
+                        colors: [Colors.red, Colors.blue],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                     ),
-                  ],
-                  innerShadows: [
-                    Shadow(
-                      color: Colors.red.withOpacity(1),
-                      offset: const Offset(-3, -3),
-                      blurRadius: 5,
-                    ),
-                    Shadow(
-                      color: Colors.yellow.withOpacity(1),
-                      offset: const Offset(3, 3),
-                      blurRadius: 5,
-                    ),
-                  ],
+                  ),
+                  box: BoxModel(
+                    margin: const EdgeInsets.all(12),
+                    height: 200,
+                    width: 200,
+                  ),
                 ),
-                box: BoxModel(
-                  margin: const EdgeInsets.all(12),
-                  height: 200,
-                  width: 200,
-                ),
-              ),
+              ],
             ),
           ),
         );

@@ -218,7 +218,12 @@ class Frame<T> extends StatelessWidget {
 
     /// Add padding
     if (box?.padding != null) {
-      child = Padding(padding: box!.padding!, child: child);
+      final effectivePadding = switch ((box!.padding, style?.border?.dimensions)) {
+        (null, final EdgeInsetsGeometry? padding) => padding,
+        (final EdgeInsetsGeometry? padding, null) => padding,
+        (_) => box!.padding!.add(style!.border!.dimensions),
+      };
+      child = Padding(padding: effectivePadding!, child: child);
     }
 
     /// Insert into StyledBox
